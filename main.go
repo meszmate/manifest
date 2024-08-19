@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/er-azh/egmanifest/binreader"
+	"github.com/meszmate/manifest/binreader"
 )
 
 var (
