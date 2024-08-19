@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/er-azh/egmanifest/binreader"
+	"github.com/meszmate/manifest/binreader"
 )
 
 type FManifestMeta struct {
