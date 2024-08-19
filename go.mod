@@ -1,4 +1,4 @@
-module github.com/er-azh/egmanifest
+module github.com/meszmate/manifest
 
 go 1.17
 
