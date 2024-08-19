@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/er-azh/egmanifest/binreader"
+	"github.com/meszmate/manifest/binreader"
 )
 
 type FCustomFields struct {
