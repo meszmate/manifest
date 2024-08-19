@@ -1,4 +1,4 @@
-package egmanifest
+package manifest
 
 import (
 	"encoding/binary"
