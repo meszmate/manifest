@@ -1,2 +1,2 @@
-# egmanifest
-A parser for binary epic games launcher manifests.
+# Epic Games Manifest Parser
+Epic games is using .manifest files to download or update games
