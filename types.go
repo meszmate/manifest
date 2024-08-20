@@ -1,4 +1,4 @@
-package egmanifest
+package manifest
 
 //go:generate stringer -type=EFeatureLevel
 type EFeatureLevel int32
