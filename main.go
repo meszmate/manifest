@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"net/http"
 
 	"github.com/meszmate/manifest/binreader"
-	"github.com/google/uuid"
 )
 
 var (
@@ -52,7 +53,7 @@ func (m *BinaryManifest) ApplyDelta(deltaManifest *BinaryManifest) {
 		if deltaFile == nil{
 			continue
 		}
-		m.FileManifestList[i] = *deltaFile
+		m.FileManifestList.FileManifestList[i] = *deltaFile
 		added = append(added, deltaFile.FileName)
 	}
 	for _, deltaFile := range deltaManifest.FileManifestList.FileManifestList{
@@ -60,7 +61,7 @@ func (m *BinaryManifest) ApplyDelta(deltaManifest *BinaryManifest) {
 			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList, deltaFile)
 		}
 	}
-	m.FileManifestList.Count = len(m.FileManifestList.FileManifestList)
+	m.FileManifestList.Count = uint32(len(m.FileManifestList.FileManifestList))
 
 	for _, chunk := range deltaManifest.ChunkDataList.Chunks{
 		_, ok := m.ChunkDataList.ChunkLookup[chunk.GUID]
@@ -68,7 +69,7 @@ func (m *BinaryManifest) ApplyDelta(deltaManifest *BinaryManifest) {
 			m.ChunkDataList.Chunks = append(m.ChunkDataList.Chunks, chunk)
 		}
 	}
-	m.ChunkDataList.Count = len(m.ChunkDataList.Chunks)
+	m.ChunkDataList.Count = uint32(len(m.ChunkDataList.Chunks))
 }
 func StringContains (array []string, s string) bool{
 	for _, i := range array{
