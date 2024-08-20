@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 
 	"github.com/meszmate/manifest/binreader"
+	"github.com/google/uuid"
 )
 
 var (
@@ -24,6 +25,82 @@ type BinaryManifest struct {
 	ChunkDataList    *FChunkDataList
 	FileManifestList *FFileManifestList
 	CustomFields     *FCustomFields
+}
+
+func GetDeltaManifest(baseURL string, newBuildID string, oldBuildID string) []byte{
+	req, err := http.Get(baseURL + "/Deltas/" + newBuildID + "/" + oldBuildID + ".delta")
+	if err != nil{
+		return nil
+	}
+	defer req.Body.Close()
+
+	if req.StatusCode != 200{
+		return nil
+	}
+	
+	deltabytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		return nil
+	}
+	return deltabytes
+}
+
+func (m *BinaryManifest) ApplyDelta(deltaManifest *BinaryManifest) {
+	var added []string = make([]string, 0)
+	for i, f := range m.FileManifestList.FileManifestList{
+		deltaFile := deltaManifest.FileManifestList.GetFileByPath(f.FileName)
+		if deltaFile == nil{
+			continue
+		}
+		m.FileManifestList[i] = *deltaFile
+		added = append(added, deltaFile.FileName)
+	}
+	for _, deltaFile := range deltaManifest.FileManifestList.FileManifestList{
+		if !StringContains(added, deltaFile.FileName){
+			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList, deltaFile)
+		}
+	}
+	m.FileManifestList.Count = len(m.FileManifestList.FileManifestList)
+
+	for _, chunk := range deltaManifest.ChunkDataList.Chunks{
+		_, ok := m.ChunkDataList.ChunkLookup[chunk.GUID]
+		if !ok{
+			m.ChunkDataList.Chunks = append(m.ChunkDataList.Chunks, chunk)
+		}
+	}
+	m.ChunkDataList.Count = len(m.ChunkDataList.Chunks)
+}
+func StringContains (array []string, s string) bool{
+	for _, i := range array{
+		if i == s{
+			return true
+		}
+	}
+	return false
+}
+func LoadFileBytes(path string) []byte{
+	filebytes, err := os.ReadFile(path)
+	if err != nil{
+		return nil
+	}
+	return filebytes
+}
+func LoadURLBytes(url string) []byte{
+	req, err := http.Get(url)
+	if err != nil{
+		return nil
+	}
+	defer req.Body.Close()
+
+	if req.StatusCode != 200{
+		return nil
+	}
+
+	urlbytes, err := io.ReadAll(req.Body)
+    	if err != nil {
+        	return nil
+	}
+	return urlbytes
 }
 
 func ParseManifest(f io.ReadSeeker) (*BinaryManifest, error) {
