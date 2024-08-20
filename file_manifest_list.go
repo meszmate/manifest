@@ -142,9 +142,9 @@ func ReadFileManifestList(f io.ReadSeeker, dataList *FChunkDataList) (*FFileMani
 	for idx := range list.FileManifestList {
 		DataSize := 0 
 		for cidx := range list.FileManifestList[idx].ChunkParts{
-			DataSize += list.FileManifestList[idx].ChunkParts[cidx].Size
+			DataSize += int(list.FileManifestList[idx].ChunkParts[cidx].Size)
 		}
-		list.ManifestList[idx].FileSize = DataSize
+		list.FileManifestList[idx].FileSize = uint32(DataSize)
 	}
 	return &list, nil
 }
