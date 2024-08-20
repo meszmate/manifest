@@ -49,6 +49,7 @@ func main(){
 					log.Fatal("Chunk url is not working")
 				}
 			}
+			fmt.Println(i.FileName + " Successfully installed")
 		}
 	}
 }
