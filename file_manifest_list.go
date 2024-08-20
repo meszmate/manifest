@@ -10,11 +10,11 @@ import (
 )
 
 type FFileManifestList struct {
-	DataSize    uint32
-	DataVersion uint8
-	Count       uint32
+	DataSize    		uint32
+	DataVersion 		uint8
+	Count       		uint32
 
-	FileManifestList []File
+	FileManifestList 	[]File
 }
 
 type ChunkPart struct {
@@ -28,13 +28,14 @@ type ChunkPart struct {
 
 //TODO: implement io.ReadSeeker on this
 type File struct {
-	FileName      string
-	SymlinkTarget string
-	SHAHash       [20]byte
-	FileMetaFlags uint8
-	InstallTags   []string
+	FileName      	string
+	SymlinkTarget 	string
+	SHAHash       	[20]byte
+	FileMetaFlags 	uint8
+	InstallTags   	[]string
+	FileSize      	uint32
 
-	ChunkParts []ChunkPart
+	ChunkParts 	[]ChunkPart
 }
 
 func (f *FFileManifestList) GetFileByPath(p string) *File{
@@ -137,6 +138,13 @@ func ReadFileManifestList(f io.ReadSeeker, dataList *FChunkDataList) (*FFileMani
 			}
 		}
 
+	}
+	for idx := range list.FileManifestList {
+		DataSize := 0 
+		for cidx := range list.FileManifestList[idx].ChunkParts{
+			DataSize += list.FileManifestList[idx].ChunkParts[cidx].Size
+		}
+		list.ManifestList[idx].FileSize = DataSize
 	}
 	return &list, nil
 }
