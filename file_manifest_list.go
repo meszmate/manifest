@@ -37,6 +37,15 @@ type File struct {
 	ChunkParts []ChunkPart
 }
 
+func (f *FFileManifestList) GetFileByPath(p string) *File{
+	for _, i := range f.FileManifestList{
+		if i.FileName == p{
+			return &i
+		}
+	}
+	return nil
+}
+
 func ReadFileManifestList(f io.ReadSeeker, dataList *FChunkDataList) (*FFileManifestList, error) {
 	reader := binreader.NewReader(f, binary.LittleEndian)
 	var list FFileManifestList
