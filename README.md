@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	manifest "github.com/meszmate/manifest"
 	chunks "github.com/meszmate/manifest/chunks"
