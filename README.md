@@ -2,7 +2,7 @@
 Epic games is using manifest files to download or update games 
 
 ## Example
-If you want to use this libary, you need to understand how epic games is downloading and updating games. You can check Epic Games alternative libaries on github, but here's a fast example of installing all paks from the FortniteGame/Content/Paks directory.
+If you want to use this libary, you need to understand how epic games is downloading and updating games. You can check Epic Games alternative libaries on github, but here's a fast example of installing all files from the FortniteGame/Content/Paks directory.
 ```go
 package main
 
