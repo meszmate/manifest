@@ -84,7 +84,8 @@ When you get the manifest from epic games api, you will get "elements" for manif
 newManifest, _ := manifest.ParseManifest(...)
 oldManifest, _ := manifest.ParseManifest(...)
 deltaManifestBytes := manifest.GetDeltaManifest("the base url", new_manifest.Metadata.BuildId, old_manifest.Metadata.BuildId)
-deltaManifest, _ := manifest.ParseManifest(deltaManifestBytes)
+deltaManifestReader := bytes.NewReader(deltaManifestBytes)
+deltaManifest, _ := manifest.ParseManifest(deltaManifestReader)
 newManifest.ApplyDelta(deltaManifest)
 ```
 
