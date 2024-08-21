@@ -38,6 +38,31 @@ type ChunkHeader struct {
 	HashType           uint32
 }
 
+func Decompress(data []byte) ([]byte, error) {
+	offset := data[8]
+
+	var slicedData []byte
+	if offset == 120 {
+		slicedData = data[8:]
+	} else {
+		slicedData = data[offset:]
+	}
+
+	reader, err := zlib.NewReader(bytes.NewReader(slicedData))
+	if err != nil {
+		return slicedData, nil
+	}
+	defer reader.Close()
+
+	var outBuffer bytes.Buffer
+	_, err = io.Copy(&outBuffer, reader)
+	if err != nil {
+		return slicedData, nil
+	}
+
+	return outBuffer.Bytes(), nil
+}
+
 func ParseChunkHeader(r io.ReadSeeker) (*ChunkHeader, error) {
 	header := ChunkHeader{}
 	reader := binreader.NewReader(r, binary.LittleEndian)
