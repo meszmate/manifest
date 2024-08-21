@@ -50,7 +50,7 @@ func main(){
 					}
 					file.Write(newdata[x.Offset:x.Offset+x.Size])
 				}else{
-					log.Fatal("Chunk url is not working")
+					fmt.Println("Failed to get a chunk, next...")
 				}
 			}
 			fmt.Println(i.FileName + " Successfully installed")
