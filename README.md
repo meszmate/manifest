@@ -1,7 +1,7 @@
 # Epic Games Manifest Parser
 Epic games is using manifest files to download or update games 
 
-# Example
+## Example
 If you want to use this libary, you need to understand how epic games is downloading and updating games. You can check Epic Games alternative libaries on github, but here's a fast example of installing all pakchunk.
 ```go
 package main
@@ -70,7 +70,7 @@ func getChunkByURL(url string, retries int) []byte{
 	return nil
 }
 ```
-# Chunk Download BaseURLs Performance
+## Chunk Download BaseURLs Performance
 ```
 http://download.epicgames.com/Builds/Fortnite/CloudDir/       		20-21 ms
 http://cloudflare.epicgamescdn.com/Builds/Fortnite/CloudDir/  		34-36 ms
@@ -78,7 +78,7 @@ http://fastly-download.epicgames.com/Builds/Fortnite/CloudDir/ 		19-20 ms
 http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/      27-28 ms
 ```
 
-# Manifest ApplyDelta Usage
+## Manifest ApplyDelta Usage
 When you get the manifest from epic games api, you will get "elements" for manifest, you have to choose one "uri", and that will be the delta manifest baseURL. Example:
 ```go
 newManifest, _ := manifest.ParseManifest(...)
@@ -88,6 +88,6 @@ deltaManifest, _ := manifest.ParseManifest(deltaManifestBytes)
 newManifest.ApplyDelta(deltaManifest)
 ```
 
-# How updating is working?
+## How updating is working?
 for updating a game, you will need the old manifest + you can use applyDelta function for optimizing the NEW manifest. Changed chunks will have different guid.
 
