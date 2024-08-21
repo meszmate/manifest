@@ -22,7 +22,7 @@ const downloadpath string = "/Users/meszmate/manifestparse/"
 const max_retries int = 7
 
 func main(){
-	
+	stime := time.Now().Unix()
 	filebytes := manifest.LoadFileBytes("/Users/meszmate/Downloads/889Cfv4W7UAZ6Jn0dUyIuV0kX7gTog.manifest")
 	manifestreader := bytes.NewReader(filebytes)
 	binary, err := manifest.ParseManifest(manifestreader)
@@ -56,6 +56,8 @@ func main(){
 			fmt.Println(i.FileName + " Successfully installed")
 		}
 	}
+	etime := time.Now().Unix()
+	fmt.Printf("Installed in %d seconds\n", stime-etime)
 }
 
 func getChunkByURL(url string, retries int) []byte{
