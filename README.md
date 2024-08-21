@@ -61,6 +61,7 @@ func getChunkByURL(url string, retries int) []byte{
 		if newbytes != nil{
 			return newbytes
 		}
+		retry++
 	}
 	return nil
 }
