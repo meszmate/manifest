@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	manifest "github.com/meszmate/manifest"
+	chunks "github.com/meszmate/manifest/chunks"
 )
 
 const downloadpath string = "/Users/meszmate/manifestparse/"
@@ -43,8 +44,11 @@ func main(){
 			for _, x := range i.ChunkParts{
 				newbytes := getChunkByURL(x.Chunk.GetURL("http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/ChunksV4"), max_retries)
 				if newbytes != nil{
-					file.Seek(int64(x.Offset), 0)
-					file.Write(newbytes)
+					newdata, err := chunks.Decompress(newbytes)
+					if err != nil{
+						log.Fatal("Failed to decompress: " + err.Error())
+					}
+					file.Write(newdata[x.Offset:x.Offset+x.Size])
 				}else{
 					log.Fatal("Chunk url is not working")
 				}
@@ -66,6 +70,24 @@ func getChunkByURL(url string, retries int) []byte{
 	return nil
 }
 ```
+# Chunk Download BaseURLs Performance
+```
+http://download.epicgames.com/Builds/Fortnite/CloudDir/       		20-21 ms
+http://cloudflare.epicgamescdn.com/Builds/Fortnite/CloudDir/  		34-36 ms
+http://fastly-download.epicgames.com/Builds/Fortnite/CloudDir/ 		19-20 ms
+http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/      27-28 ms
+```
+
+# Manifest ApplyDelta Usage
+When you get the manifest from epic games api, you will get "elements" for manifest, you have to choose one "uri", and that will be the delta manifest baseURL. Example:
+```go
+newManifest, _ := manifest.ParseManifest(...)
+oldManifest, _ := manifest.ParseManifest(...)
+deltaManifestBytes := manifest.GetDeltaManifest("the base url", new_manifest.Metadata.BuildId, old_manifest.Metadata.BuildId)
+deltaManifest, _ := manifest.ParseManifest(deltaManifestBytes)
+newManifest.ApplyDelta(deltaManifest)
+```
+
 # How updating is working?
 for updating a game, you will need the old manifest + you can use applyDelta function for optimizing the NEW manifest. Changed chunks will have different guid.
 
