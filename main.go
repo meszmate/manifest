@@ -127,14 +127,14 @@ func LoadURLBytes(url string) []byte{
 
 func (m *BinaryManifest) DelInstallTagFiles(tags []string){
 	for i, f := range m.FileManifestList.FileManifestList{
-		if StringContains2(i.InstallTags, tags){
+		if StringContains2(f.InstallTags, tags){
 			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i], m.FileManifestList.FileManifestList[i+1:]...)
 		}
 	}
 }
 func (m *BinaryManifest) DelInstallTagContainFiles(tags []string){
 	for i, f := range m.FileManifestList.FileManifestList{
-		if StringContains3(i.InstallTags, tags){
+		if StringContains3(f.InstallTags, tags){
 			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i], m.FileManifestList.FileManifestList[i+1:]...)
 		}
 	}
