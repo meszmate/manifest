@@ -133,9 +133,11 @@ func (m *BinaryManifest) DelInstallTagFiles(tags []string){
 	}
 }
 func (m *BinaryManifest) DelInstallTagContainFiles(tags []string){
+	done := 0
 	for i, f := range m.FileManifestList.FileManifestList{
 		if StringContains3(f.InstallTags, tags){
-			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i], m.FileManifestList.FileManifestList[i+1:]...)
+			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i-done], m.FileManifestList.FileManifestList[i+1-done:]...)
+			done++
 		}
 	}
 }
