@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"net/http"
+	"strings"
 
 	"github.com/meszmate/manifest/binreader"
 )
