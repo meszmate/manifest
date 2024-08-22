@@ -49,7 +49,7 @@ func main(){
 			}
 			defer file.Close()
 			for _, x := range i.ChunkParts{
-				newbytes := getChunkByURL(x.Chunk.GetURL("http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/ChunksV4"), max_retries)
+				newbytes := getChunkByURL(x.Chunk.GetURL("http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/" + binary.Metadata.FeatureLevel.ChunkSubDir()), max_retries)
 				if newbytes != nil{
 					newdata, err := chunks.Decompress(newbytes)
 					if err != nil{
