@@ -35,9 +35,8 @@ func main(){
 	if err != nil{
 		fmt.Println(err)
 	}
-	binary.DelInstallTagContainFiles([]string{"highres", "ondemand"})
 	for _, i := range binary.FileManifestList.FileManifestList{
-		if strings.HasPrefix(i.FileName, "FortniteGame/Content/Paks"){
+		if strings.HasPrefix(i.FileName, "FortniteGame/Content/Paks") && !manifest.StringContains3(i.InstallTags, []string{"highres", "ondemand"}){
 			fpath := downloadpath + i.FileName
 			err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
 			if err != nil {
