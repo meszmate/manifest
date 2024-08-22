@@ -79,6 +79,14 @@ func StringContains (array []string, s string) bool{
 	}
 	return false
 }
+func StringContains2 (array []string, s string) bool{
+	for _, i := range array{
+		if strings.Contains(i, s){
+			return true
+		}
+	}
+	return false
+}
 func LoadFileBytes(path string) []byte{
 	filebytes, err := os.ReadFile(path)
 	if err != nil{
@@ -102,6 +110,25 @@ func LoadURLBytes(url string) []byte{
         	return nil
 	}
 	return urlbytes
+}
+
+func (m *BinaryManifest) DelInstallTagFiles(tags []string){
+	for i, f := range m.FileManifestList.FileManifestList{
+		for _, x := range f.InstallTags{
+			if StringContains(tags, x){
+				m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i], m.FileManifestList.FileManifestList[i+1:]...)
+			}
+		}
+	}
+}
+func (m *BinaryManifest) DelInstallTagContainFiles(tags []string){
+	for i, f := range m.FileManifestList.FileManifestList{
+		for _, x := range f.InstallTags{
+			if StringContains2(tags, x){
+				m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i], m.FileManifestList.FileManifestList[i+1:]...)
+			}
+		}
+	}
 }
 
 func ParseManifest(f io.ReadSeeker) (*BinaryManifest, error) {
