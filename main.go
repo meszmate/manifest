@@ -126,9 +126,11 @@ func LoadURLBytes(url string) []byte{
 }
 
 func (m *BinaryManifest) DelInstallTagFiles(tags []string){
+	done := 0
 	for i, f := range m.FileManifestList.FileManifestList{
 		if StringContains2(f.InstallTags, tags){
-			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i], m.FileManifestList.FileManifestList[i+1:]...)
+			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i-done], m.FileManifestList.FileManifestList[i+1-done:]...)
+			done++
 		}
 	}
 }
