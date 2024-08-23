@@ -36,7 +36,7 @@ func main(){
 		fmt.Println(err)
 	}
 	for _, i := range binary.FileManifestList.FileManifestList{
-		if !manifest.StringContains3(i.InstallTags, []string{"br_highres", "stw_highres", "core_highres", "ondemand", "sm6"}){ // "stw" if you dont want to install the save the world stuffs
+		if !manifest.StringContains3(i.InstallTags, []string{"br_highres", "stw_highres", "core_highres", "ondemand", "sm6"}){ 
 			fpath := downloadpath + i.FileName
 			err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
 			if err != nil {
