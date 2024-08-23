@@ -7,7 +7,7 @@ go get github.com/meszmate/manifest
 ```
 
 ## Example
-If you want to use this libary, you need to understand how epic games is downloading and updating games. You can check Epic Games alternative libaries on github, but here's a fast example of installing all files from the FortniteGame/Content/Paks directory.
+If you want to use this libary, you need to understand how epic games is downloading and updating games. You can check Epic Games alternative libaries on github, but here's a fast example of installing the files.
 ```go
 package main
 
@@ -36,7 +36,7 @@ func main(){
 		fmt.Println(err)
 	}
 	for _, i := range binary.FileManifestList.FileManifestList{
-		if strings.HasPrefix(i.FileName, "FortniteGame/Content/Paks") && !manifest.StringContains3(i.InstallTags, []string{"br_highres", "stw_highres", "core_highres", "ondemand", "sm6"}){ // "stw" if you dont want to install the save the world stuffs
+		if !manifest.StringContains3(i.InstallTags, []string{"br_highres", "stw_highres", "core_highres", "ondemand", "sm6"}){ // "stw" if you dont want to install the save the world stuffs
 			fpath := downloadpath + i.FileName
 			err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
 			if err != nil {
