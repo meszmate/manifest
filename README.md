@@ -24,19 +24,19 @@ import (
 	chunks "github.com/meszmate/manifest/chunks"
 )
 
-const downloadpath string = "/Users/meszmate/manifestparse/"
+const downloadpath string = "/Users/meszmate/manifestparse/" // Leave it empty if you want to install in the current directory
 const max_retries int = 7
 
 func main(){
 	stime := time.Now().Unix()
-	filebytes := manifest.LoadFileBytes("/Users/meszmate/Downloads/889Cfv4W7UAZ6Jn0dUyIuV0kX7gTog.manifest")
+	filebytes := manifest.LoadFileBytes("/Users/meszmate/Downloads/889Cfv4W7UAZ6Jn0dUyIuV0kX7gTog.manifest") // manifest.LoadURLBytes("url") if you want to get the manifest from url
 	manifestreader := bytes.NewReader(filebytes)
 	binary, err := manifest.ParseManifest(manifestreader)
 	if err != nil{
 		fmt.Println(err)
 	}
 	for _, i := range binary.FileManifestList.FileManifestList{
-		if strings.HasPrefix(i.FileName, "FortniteGame/Content/Paks") && !manifest.StringContains3(i.InstallTags, []string{"highres", "ondemand"}){
+		if strings.HasPrefix(i.FileName, "FortniteGame/Content/Paks") && !manifest.StringContains3(i.InstallTags, []string{"br_highres", "stw_highres", "core_highres", "ondemand", "sm6"}){ // "stw" if you dont want to install the save the world stuffs
 			fpath := downloadpath + i.FileName
 			err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
 			if err != nil {
@@ -48,7 +48,7 @@ func main(){
 			}
 			defer file.Close()
 			for _, x := range i.ChunkParts{
-				newbytes := getChunkByURL(x.Chunk.GetURL("http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/" + binary.Metadata.FeatureLevel.ChunkSubDir()), max_retries)
+				newbytes := getChunkByURL(x.Chunk.GetURL("http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/" + binary.Metadata.FeatureLevel.ChunkSubDir()), max_retries) 
 				if newbytes != nil{
 					newdata, err := chunks.Decompress(newbytes)
 					if err != nil{
