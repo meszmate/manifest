@@ -63,7 +63,7 @@ func main(){
 		}
 	}
 	etime := time.Now().Unix()
-	fmt.Printf("Installed in %d seconds\n", stime-etime)
+	fmt.Printf("Installed in %d seconds\n", etime-stime)
 }
 
 func getChunkByURL(url string, retries int) []byte{
