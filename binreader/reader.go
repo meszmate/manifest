@@ -14,24 +14,24 @@ var (
 	ErrNegativeAmount = errors.New("negetive bytes count")
 )
 
-func NewReader(r io.ReadSeeker, order binary.ByteOrder) *reader {
+func NewReader(r io.ReadSeeker, order binary.ByteOrder) *Reader {
 	return &reader{
 		r:     r,
 		order: order,
 	}
 }
 
-type reader struct {
+type Reader struct {
 	r     io.ReadSeeker
 	order binary.ByteOrder
 }
 
-func (r *reader) ReadAll() ([]byte, error) {
+func (r *Reader) ReadAll() ([]byte, error) {
 	b, err := ioutil.ReadAll(r.r)
 	return b, err
 }
 
-func (r *reader) ReadBytes(count int) (n int, out []byte, err error) {
+func (r *Reader) ReadBytes(count int) (n int, out []byte, err error) {
 	if count < 0 {
 		return 0, nil, ErrNegativeAmount
 	}
@@ -46,7 +46,7 @@ func (r *reader) ReadBytes(count int) (n int, out []byte, err error) {
 	return
 }
 
-func (r *reader) ReadUint8() (uint8, error) {
+func (r *Reader) ReadUint8() (uint8, error) {
 	_, b, err := r.ReadBytes(1)
 	if err != nil {
 		return 0, err
@@ -55,16 +55,16 @@ func (r *reader) ReadUint8() (uint8, error) {
 	return b[0], nil
 }
 
-func (r *reader) ReadBool() (bool, error) {
+func (r *Reader) ReadBool() (bool, error) {
 	b, err := r.ReadByte()
 	return b != 0, err
 }
 
-func (r *reader) ReadByte() (byte, error) {
+func (r *Reader) ReadByte() (byte, error) {
 	return r.ReadUint8()
 }
 
-func (r *reader) ReadUint16() (uint16, error) {
+func (r *Reader) ReadUint16() (uint16, error) {
 	_, b, err := r.ReadBytes(2)
 	if err != nil {
 		return 0, err
@@ -73,7 +73,7 @@ func (r *reader) ReadUint16() (uint16, error) {
 	return r.order.Uint16(b), nil
 }
 
-func (r *reader) ReadUint32() (uint32, error) {
+func (r *Reader) ReadUint32() (uint32, error) {
 	_, b, err := r.ReadBytes(4)
 	if err != nil {
 		return 0, err
@@ -82,7 +82,7 @@ func (r *reader) ReadUint32() (uint32, error) {
 	return r.order.Uint32(b), nil
 }
 
-func (r *reader) ReadUint64() (uint64, error) {
+func (r *Reader) ReadUint64() (uint64, error) {
 	_, b, err := r.ReadBytes(8)
 	if err != nil {
 		return 0, err
@@ -91,27 +91,27 @@ func (r *reader) ReadUint64() (uint64, error) {
 	return r.order.Uint64(b), nil
 }
 
-func (r *reader) ReadInt8() (int8, error) {
+func (r *Reader) ReadInt8() (int8, error) {
 	i, err := r.ReadUint8()
 	return int8(i), err
 }
 
-func (r *reader) ReadInt16() (int16, error) {
+func (r *Reader) ReadInt16() (int16, error) {
 	i, err := r.ReadUint16()
 	return int16(i), err
 }
 
-func (r *reader) ReadInt32() (int32, error) {
+func (r *Reader) ReadInt32() (int32, error) {
 	i, err := r.ReadUint32()
 	return int32(i), err
 }
 
-func (r *reader) ReadInt64() (int64, error) {
+func (r *Reader) ReadInt64() (int64, error) {
 	i, err := r.ReadUint64()
 	return int64(i), err
 }
 
-func (r *reader) ReadFloat32() (float32, error) {
+func (r *Reader) ReadFloat32() (float32, error) {
 	b, err := r.ReadUint32()
 	if err != nil {
 		return 0, err
@@ -120,7 +120,7 @@ func (r *reader) ReadFloat32() (float32, error) {
 	return math.Float32frombits(b), nil
 }
 
-func (r *reader) ReadFloat64() (float64, error) {
+func (r *Reader) ReadFloat64() (float64, error) {
 	b, err := r.ReadUint64()
 	if err != nil {
 		return 0, err
@@ -129,16 +129,16 @@ func (r *reader) ReadFloat64() (float64, error) {
 	return math.Float64frombits(b), nil
 }
 
-func (r *reader) Read(p []byte) (n int, err error) {
+func (r *Reader) Read(p []byte) (n int, err error) {
 	return r.r.Read(p)
 }
 
-func (r *reader) Seek(offset int64, whence int) (int64, error) {
+func (r *Reader) Seek(offset int64, whence int) (int64, error) {
 	i, err := r.r.Seek(offset, whence)
 	return i, err
 }
 
-func (r *reader) Peek(n int) ([]byte, error) {
+func (r *Reader) Peek(n int) ([]byte, error) {
 	bytesRead, b, err := r.ReadBytes(n)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (r *reader) Peek(n int) ([]byte, error) {
 }
 
 // reads a FString (null-terminated string starting with the length) from r
-func (r *reader) ReadFString() (string, error) {
+func (r *Reader) ReadFString() (string, error) {
 	size, err := r.ReadUint32()
 	if err != nil || size == 0 {
 		return "", err
@@ -166,7 +166,7 @@ func (r *reader) ReadFString() (string, error) {
 }
 
 // read an array of FStrings. they start wtih the length then the data
-func (r *reader) ReadFStringArray() (out []string, err error) {
+func (r *Reader) ReadFStringArray() (out []string, err error) {
 	size, err := r.ReadUint32()
 	if err != nil {
 		return nil, err
@@ -184,7 +184,7 @@ func (r *reader) ReadFStringArray() (out []string, err error) {
 }
 
 // reads a GUID which is stored as 4 uint32 segments written in Big Endian
-func (r *reader) ReadGUID() (guid uuid.UUID, err error) {
+func (r *Reader) ReadGUID() (guid uuid.UUID, err error) {
 	data := make([]uint32, 4)
 	err = binary.Read(r, binary.BigEndian, &data)
 	if err != nil {
