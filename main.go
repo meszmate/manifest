@@ -125,25 +125,6 @@ func LoadURLBytes(url string) []byte{
 	return urlbytes
 }
 
-func (m *BinaryManifest) DelInstallTagFiles(tags []string){
-	done := 0
-	for i, f := range m.FileManifestList.FileManifestList{
-		if StringContains2(f.InstallTags, tags){
-			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i-done], m.FileManifestList.FileManifestList[i+1-done:]...)
-			done++
-		}
-	}
-}
-func (m *BinaryManifest) DelInstallTagContainFiles(tags []string){
-	done := 0
-	for i, f := range m.FileManifestList.FileManifestList{
-		if StringContains3(f.InstallTags, tags){
-			m.FileManifestList.FileManifestList = append(m.FileManifestList.FileManifestList[:i-done], m.FileManifestList.FileManifestList[i+1-done:]...)
-			done++
-		}
-	}
-}
-
 func ParseManifest(f io.ReadSeeker) (*BinaryManifest, error) {
 	magic, err := binreader.NewReader(f, binary.LittleEndian).ReadUint32()
 	if err != nil {
