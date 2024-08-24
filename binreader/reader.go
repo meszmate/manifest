@@ -15,7 +15,7 @@ var (
 )
 
 func NewReader(r io.ReadSeeker, order binary.ByteOrder) *Reader {
-	return &reader{
+	return &Reader{
 		r:     r,
 		order: order,
 	}
@@ -30,7 +30,9 @@ func (r *Reader) ReadAll() ([]byte, error) {
 	b, err := ioutil.ReadAll(r.r)
 	return b, err
 }
-
+func (r *Reader) ReadString(chars int) (string, error){
+	
+}
 func (r *Reader) ReadBytes(count int) (n int, out []byte, err error) {
 	if count < 0 {
 		return 0, nil, ErrNegativeAmount
