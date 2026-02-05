@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/meszmate/manifest/binreader"
 	"github.com/google/uuid"
+	"github.com/meszmate/manifest/binreader"
 )
 
+// FChunkDataList holds all chunk entries in a manifest along with a lookup map.
 type FChunkDataList struct {
 	DataSize    uint32
 	DataVersion uint8
@@ -18,6 +19,7 @@ type FChunkDataList struct {
 	ChunkLookup map[uuid.UUID]uint32
 }
 
+// Chunk represents a single downloadable chunk referenced by the manifest.
 type Chunk struct {
 	GUID       uuid.UUID
 	Hash       uint64
@@ -27,12 +29,19 @@ type Chunk struct {
 	FileSize   uint64
 }
 
-// gets the URL for a chunk.
-// example for chunksDir: http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/ChunksV4
+// String returns a human-readable summary of the chunk.
+func (c Chunk) String() string {
+	return fmt.Sprintf("Chunk %s (group %d, %d bytes)", c.GUID, c.Group, c.FileSize)
+}
+
+// GetURL returns the CDN URL for downloading this chunk.
+// chunksDir should include the version sub-directory, e.g.
+// "http://epicgames-download1.akamaized.net/Builds/Fortnite/CloudDir/ChunksV4".
 func (c *Chunk) GetURL(chunksDir string) string {
 	return fmt.Sprintf("%s/%02d/%016X_%X.chunk", chunksDir, c.Group, c.Hash, c.GUID[:])
 }
 
+// ReadChunkDataList reads the chunk data list section from f.
 func ReadChunkDataList(f io.ReadSeeker) (*FChunkDataList, error) {
 	reader := binreader.NewReader(f, binary.LittleEndian)
 	var list FChunkDataList
@@ -54,7 +63,6 @@ func ReadChunkDataList(f io.ReadSeeker) (*FChunkDataList, error) {
 	}
 
 	list.Chunks = make([]*Chunk, list.Count)
-	// initialize all chunks
 	for i := uint32(0); i < list.Count; i++ {
 		list.Chunks[i] = &Chunk{}
 	}

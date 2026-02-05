@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/meszmate/manifest/binreader"
 	"github.com/google/uuid"
+	"github.com/meszmate/manifest/binreader"
 )
 
+// FFileManifestList holds all file entries in a manifest.
 type FFileManifestList struct {
-	DataSize    		uint32
-	DataVersion 		uint8
-	Count       		uint32
+	DataSize    uint32
+	DataVersion uint8
+	Count       uint32
 
-	FileManifestList 	[]File
+	FileManifestList []File
 }
 
+// ChunkPart represents a region within a chunk that contributes to a file.
 type ChunkPart struct {
 	DataSize   uint32
 	ParentGUID uuid.UUID
@@ -26,27 +28,48 @@ type ChunkPart struct {
 	Chunk *Chunk
 }
 
-//TODO: implement io.ReadSeeker on this
+// File represents a single file entry in the manifest.
 type File struct {
-	FileName      	string
-	SymlinkTarget 	string
-	SHAHash       	[20]byte
-	FileMetaFlags 	uint8
-	InstallTags   	[]string
-	FileSize      	uint32
+	FileName      string
+	SymlinkTarget string
+	SHAHash       [20]byte
+	FileMetaFlags uint8
+	InstallTags   []string
+	FileSize      uint64
 
-	ChunkParts 	[]ChunkPart
+	ChunkParts []ChunkPart
 }
 
-func (f *FFileManifestList) GetFileByPath(p string) *File{
-	for _, i := range f.FileManifestList{
-		if i.FileName == p{
-			return &i
+// String returns a human-readable summary of the file.
+func (f File) String() string {
+	return fmt.Sprintf("%s (%d bytes, %d chunks)", f.FileName, f.FileSize, len(f.ChunkParts))
+}
+
+// GetFileByPath returns a pointer to the file with the given path, or nil if not found.
+func (f *FFileManifestList) GetFileByPath(p string) *File {
+	for idx := range f.FileManifestList {
+		if f.FileManifestList[idx].FileName == p {
+			return &f.FileManifestList[idx]
 		}
 	}
 	return nil
 }
 
+// GetFilesByTag returns all files that have the given install tag.
+func (f *FFileManifestList) GetFilesByTag(tag string) []*File {
+	var result []*File
+	for idx := range f.FileManifestList {
+		for _, t := range f.FileManifestList[idx].InstallTags {
+			if t == tag {
+				result = append(result, &f.FileManifestList[idx])
+				break
+			}
+		}
+	}
+	return result
+}
+
+// ReadFileManifestList reads the file manifest list section from f.
 func ReadFileManifestList(f io.ReadSeeker, dataList *FChunkDataList) (*FFileManifestList, error) {
 	reader := binreader.NewReader(f, binary.LittleEndian)
 	var list FFileManifestList
@@ -137,14 +160,15 @@ func ReadFileManifestList(f io.ReadSeeker, dataList *FChunkDataList) (*FFileMani
 				return nil, err
 			}
 		}
+	}
 
-	}
 	for idx := range list.FileManifestList {
-		DataSize := 0 
-		for cidx := range list.FileManifestList[idx].ChunkParts{
-			DataSize += int(list.FileManifestList[idx].ChunkParts[cidx].Size)
+		var dataSize uint64
+		for cpIdx := range list.FileManifestList[idx].ChunkParts {
+			dataSize += uint64(list.FileManifestList[idx].ChunkParts[cpIdx].Size)
 		}
-		list.FileManifestList[idx].FileSize = uint32(DataSize)
+		list.FileManifestList[idx].FileSize = dataSize
 	}
+
 	return &list, nil
 }

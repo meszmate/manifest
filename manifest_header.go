@@ -4,10 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/meszmate/manifest/binreader"
 )
 
+// FManifestHeader represents the header of a binary manifest file.
 type FManifestHeader struct {
 	HeaderSize           int32
 	DataSizeUncompressed int32
@@ -17,14 +19,18 @@ type FManifestHeader struct {
 	Version              EFeatureLevel
 }
 
+// String returns a human-readable representation of the manifest header.
 func (h FManifestHeader) String() string {
-	storedAs := ""
-
+	var flags []string
 	if (h.StoredAs & StoredCompressed) != 0 {
-		storedAs += " Compressed"
+		flags = append(flags, "Compressed")
 	}
 	if (h.StoredAs & StoredEncrypted) != 0 {
-		storedAs += " Encrypted"
+		flags = append(flags, "Encrypted")
+	}
+	storedAs := "None"
+	if len(flags) > 0 {
+		storedAs = strings.Join(flags, " ")
 	}
 
 	return fmt.Sprintf(`Header Size: %d bytes
@@ -33,10 +39,12 @@ Uncompressed Data Size: %d bytes
 SHA hash: %x
 Stored As: %s
 Version: %s`, h.HeaderSize, h.DataSizeCompressed, h.DataSizeUncompressed, h.SHAHash,
-		storedAs[1:], h.Version.String(),
+		storedAs, h.Version.String(),
 	)
 }
 
+// ParseHeader reads and parses a manifest header from f.
+// The caller should have already consumed the 4-byte magic number.
 func ParseHeader(f io.ReadSeeker) (*FManifestHeader, error) {
 	reader := binreader.NewReader(f, binary.LittleEndian)
 	var header FManifestHeader
