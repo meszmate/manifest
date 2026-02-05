@@ -8,6 +8,8 @@ import (
 	"github.com/meszmate/manifest/binreader"
 )
 
+// FManifestMeta contains manifest metadata such as the app name, build version,
+// and prerequisite information.
 type FManifestMeta struct {
 	DataSize    uint32
 	DataVersion uint8
@@ -24,10 +26,11 @@ type FManifestMeta struct {
 	PrereqPath    string
 	PrereqArgs    string
 
-	// if DataVersion >= 1
+	// BuildId is present when DataVersion >= 1.
 	BuildId string
 }
 
+// String returns a human-readable representation of the manifest metadata.
 func (m FManifestMeta) String() string {
 	out := fmt.Sprintf(`Data size in file: %d bytes
 Data version: %d
@@ -46,11 +49,12 @@ Prerequisite Args: %s`, m.DataSize, m.DataVersion, m.FeatureLevel.String(),
 		m.LaunchCommand, m.PrereqIds, m.PrereqName, m.PrereqPath, m.PrereqArgs)
 
 	if m.DataVersion >= 1 {
-		out += fmt.Sprintf(`Build ID: %s`, m.BuildId)
+		out += fmt.Sprintf("\nBuild ID: %s", m.BuildId)
 	}
 	return out
 }
 
+// ReadFManifestMeta reads manifest metadata from f.
 func ReadFManifestMeta(f io.ReadSeeker) (*FManifestMeta, error) {
 	reader := binreader.NewReader(f, binary.LittleEndian)
 	var meta FManifestMeta

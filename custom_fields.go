@@ -7,6 +7,7 @@ import (
 	"github.com/meszmate/manifest/binreader"
 )
 
+// FCustomFields holds arbitrary key-value metadata attached to a manifest.
 type FCustomFields struct {
 	DataSize    uint32
 	DataVersion uint8
@@ -14,6 +15,7 @@ type FCustomFields struct {
 	Fields      map[string]string
 }
 
+// ReadCustomFields reads the custom fields section from f.
 func ReadCustomFields(f io.ReadSeeker) (*FCustomFields, error) {
 	reader := binreader.NewReader(f, binary.LittleEndian)
 	var fields FCustomFields
@@ -37,17 +39,17 @@ func ReadCustomFields(f io.ReadSeeker) (*FCustomFields, error) {
 	fields.Fields = map[string]string{}
 
 	// store the keys for the second iteration
-	firstHalf := make([]string, fields.Count)
-	for idx := range firstHalf {
-		firstHalf[idx], err = reader.ReadFString()
+	keys := make([]string, fields.Count)
+	for idx := range keys {
+		keys[idx], err = reader.ReadFString()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// map indexs to keys and use them to build the map
-	for idx := range firstHalf {
-		fields.Fields[firstHalf[idx]], err = reader.ReadFString()
+	// map indices to keys and use them to build the map
+	for idx := range keys {
+		fields.Fields[keys[idx]], err = reader.ReadFString()
 		if err != nil {
 			return nil, err
 		}

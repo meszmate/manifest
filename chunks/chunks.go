@@ -1,3 +1,4 @@
+// Package chunks provides parsing and decompression for Epic Games chunk files.
 package chunks
 
 import (
@@ -7,25 +8,27 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 
-	"github.com/meszmate/manifest/binreader"
 	"github.com/google/uuid"
+	"github.com/meszmate/manifest/binreader"
 )
 
-const (
-	ChunkHeaderMagic = 0xB1FE3AA2
-)
+// ChunkHeaderMagic is the expected magic number at the start of every chunk file.
+const ChunkHeaderMagic = 0xB1FE3AA2
 
+// ChunkStoredAs describes how a chunk's data is stored on disk.
 type ChunkStoredAs uint8
 
 const (
-	ChunkStoredAsPlaintext  ChunkStoredAs = 0x00
+	// ChunkStoredAsPlaintext indicates uncompressed chunk data.
+	ChunkStoredAsPlaintext ChunkStoredAs = 0x00
+	// ChunkStoredAsCompressed indicates zlib-compressed chunk data.
 	ChunkStoredAsCompressed ChunkStoredAs = 0x01
-	ChunkStoredAsEncrypted  ChunkStoredAs = 0x02
+	// ChunkStoredAsEncrypted indicates encrypted chunk data.
+	ChunkStoredAsEncrypted ChunkStoredAs = 0x02
 )
 
-// ChunkHeader defines the binary chunk header
+// ChunkHeader defines the binary chunk header.
 type ChunkHeader struct {
 	Magic              uint32 // 0xB1FE3AA2
 	Version            uint32
@@ -38,31 +41,43 @@ type ChunkHeader struct {
 	HashType           uint32
 }
 
+// Decompress decompresses a raw chunk downloaded from the CDN.
+// The data layout is: header bytes followed by zlib-compressed payload.
+// The byte at offset 8 indicates the start of the zlib stream unless it equals 120 (0x78),
+// in which case the zlib data starts at offset 8 itself.
 func Decompress(data []byte) ([]byte, error) {
+	if len(data) < 9 {
+		return nil, errors.New("chunk data too short: need at least 9 bytes")
+	}
+
 	offset := data[8]
 
 	var slicedData []byte
 	if offset == 120 {
 		slicedData = data[8:]
 	} else {
+		if int(offset) > len(data) {
+			return nil, fmt.Errorf("chunk offset %d exceeds data length %d", offset, len(data))
+		}
 		slicedData = data[offset:]
 	}
 
 	reader, err := zlib.NewReader(bytes.NewReader(slicedData))
 	if err != nil {
-		return slicedData, nil
+		return nil, fmt.Errorf("zlib init: %w", err)
 	}
 	defer reader.Close()
 
 	var outBuffer bytes.Buffer
 	_, err = io.Copy(&outBuffer, reader)
 	if err != nil {
-		return slicedData, nil
+		return nil, fmt.Errorf("zlib decompress: %w", err)
 	}
 
 	return outBuffer.Bytes(), nil
 }
 
+// ParseChunkHeader reads and validates a chunk header from the given reader.
 func ParseChunkHeader(r io.ReadSeeker) (*ChunkHeader, error) {
 	header := ChunkHeader{}
 	reader := binreader.NewReader(r, binary.LittleEndian)
@@ -107,16 +122,18 @@ func ParseChunkHeader(r io.ReadSeeker) (*ChunkHeader, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &header, err
+	return &header, nil
 }
 
+// ParseChunk reads a chunk file (header + body) and returns a ReadSeeker
+// over the decompressed chunk data.
 func ParseChunk(reader io.ReadSeeker) (io.ReadSeeker, error) {
 	header, err := ParseChunkHeader(reader)
 	if err != nil {
 		return nil, err
 	}
 	if header.Version != 3 {
-		return nil, fmt.Errorf("unsupported verion %d", header.Version)
+		return nil, fmt.Errorf("unsupported version %d", header.Version)
 	}
 	_, err = reader.Seek(int64(header.HeaderSize), io.SeekStart)
 	if err != nil {
@@ -132,11 +149,11 @@ func ParseChunk(reader io.ReadSeeker) (io.ReadSeeker, error) {
 			return nil, err
 		}
 		defer inflatedReader.Close()
-		chunkData, err := ioutil.ReadAll(inflatedReader) // we need a ReadSeeker
+		chunkData, err := io.ReadAll(inflatedReader)
 		if err != nil {
 			return nil, err
 		}
-		return bytes.NewReader(chunkData), err
+		return bytes.NewReader(chunkData), nil
 	case ChunkStoredAsEncrypted:
 		return nil, errors.New("chunk is encrypted")
 	default:
